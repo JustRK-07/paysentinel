@@ -1,0 +1,91 @@
+# Core feature definitions for PaySentinel Defend pillar.
+# Each feature has: name, type (numeric/categorical), source (column or derived).
+
+features:
+
+  # ----- raw transaction features -----
+  - name: amount
+    type: numeric
+    source: column
+    column: amount
+    description: Transaction amount in account currency.
+
+  - name: amount_log
+    type: numeric
+    derived: log1p(amount)
+
+  - name: type
+    type: categorical
+    source: column
+    column: type
+
+  - name: step_hour
+    type: numeric
+    derived: step % 24
+
+  - name: balance_orig_delta
+    type: numeric
+    derived: oldbalanceOrg - newbalanceOrig
+
+  - name: balance_dest_delta
+    type: numeric
+    derived: newbalanceDest - oldbalanceDest
+
+  - name: amount_to_balance_ratio
+    type: numeric
+    derived: amount / max(1, oldbalanceOrg)
+
+  # ----- velocity / behavioral features -----
+  - name: src_count_1h
+    type: numeric
+    derived: rolling count of same-nameOrig transactions in 1h window
+  - name: src_sum_1h
+    type: numeric
+    derived: rolling sum of same-nameOrig amounts in 1h window
+  - name: src_count_24h
+    type: numeric
+    derived: rolling count of same-nameOrig transactions in 24h window
+  - name: dest_count_24h
+    type: numeric
+    derived: rolling count of same-nameDest transactions in 24h window
+  - name: src_unique_dest_24h
+    type: numeric
+    derived: count of unique destinations from nameOrig in 24h window
+  - name: is_first_seen_dest
+    type: numeric
+    derived: 1 if nameDest has never been seen for this nameOrig
+
+  # ----- amount distribution features -----
+  - name: amount_zscore_user
+    type: numeric
+    derived: z-score of amount within same-nameOrig historical amounts
+  - name: amount_percentile_user
+    type: numeric
+    derived: percentile rank of amount within same-nameOrig
+
+  # ----- pattern features (smurfing, mule) -----
+  - name: small_amount_flag
+    type: numeric
+    derived: 1 if amount < 10_000
+  - name: drain_flag
+    type: numeric
+    derived: 1 if newbalanceOrig == 0 AND amount > 0
+  - name: transfer_only_flag
+    type: numeric
+    derived: 1 if type == TRANSFER AND oldbalanceOrg > 200_000
+
+  # ----- merchant / device features (IEEE-CIS shape) -----
+  - name: device_freq
+    type: numeric
+    derived: log-frequency of DeviceInfo across the dataset
+  - name: email_domain_freq
+    type: numeric
+    derived: log-frequency of P_emaildomain across the dataset
+
+# Default label column
+label: isFraud
+
+# Default split
+test_size: 0.2
+val_size: 0.1
+random_state: 42
