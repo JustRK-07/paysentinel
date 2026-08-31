@@ -1,0 +1,31 @@
+# PaySentinel demo configuration — used by `make demo`
+# Drives the full Identify -> Generate -> Defend -> Loop pipeline with small budgets
+# so the demo completes in minutes, not hours.
+
+project:
+  name: paysentinel-demo
+  seed: 42
+
+identify:
+  catalog: identify/ATTACK_CATALOG.md
+  surfaces: [voice, video, identity, social_engineering, transaction, agentic_commerce, supply_chain]
+
+generate:
+  base_dataset: paysim           # paysim | ieee_cis | synthetic
+  base_path: data/base/paysim_sample.csv
+  models: [ctgan, tabddpm]       # generative models to compare
+  volume_per_attack: 500
+  total_volume: 5000
+  llm_backend: anthropic         # anthropic | template
+  narrative_attacks: [phishing_email, scam_call_script, synthetic_identity, kyc_document]
+
+defend:
+  features: defend/feature_lists/core.yaml
+  models: [xgboost, lightgbm, gnn, transformer, llm_judge]
+  ensemble: stacking
+  scoring_budget_ms: 50
+  test_split: 0.2
+
+closed_loop:
+  iterations: 3
+  failure_seed_top_k: 20         # top-K most-missed test cases -> seed new attacks

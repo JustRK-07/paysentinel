@@ -1,0 +1,80 @@
+[project]
+name = "paysentinel"
+version = "0.1.0"
+description = "Agentic Red-Team Lab for GenAI Payment Fraud — Identify, Generate, Defend (closed-loop)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "PaySentinel Contributors" }]
+
+dependencies = [
+    # Core
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "scipy>=1.13",
+    "scikit-learn>=1.5",
+
+    # Synthetic data
+    "sdv>=1.16",            # CTGAN, TVAE, Gaussian Copulas
+    "tab-ddpm>=0.1.0",      # TabDDPM diffusion
+
+    # Detection models
+    "xgboost>=2.1",
+    "lightgbm>=4.5",
+    "torch>=2.3",
+    "torch-geometric>=2.6",
+
+    # LLM
+    "anthropic>=0.39",
+    "httpx>=0.27",
+    "tenacity>=9.0",
+    "pydantic>=2.8",
+    "jinja2>=3.1",
+
+    # Serving
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic-settings>=2.5",
+
+    # Eval + viz
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "shap>=0.46",
+    "pyarrow>=18.0",
+
+    # Doc generation
+    "python-docx>=1.1",
+    "Pillow>=11.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "ipython>=8.30",
+]
+
+[project.scripts]
+paysentinel = "paysentinel.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["paysentinel*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"

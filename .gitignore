@@ -1,0 +1,75 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Logs
+*.log
+logs/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# Data artifacts (kept structure, ignored bulk)
+data/raw/
+data/synthetic/*.parquet
+data/synthetic/*.csv
+data/models/*.pkl
+data/models/*.pt
+data/models/*.joblib
+data/embeddings/
+!data/.gitkeep
+
+# Results
+results/runs/
+results/figures/*.png
+!results/figures/.gitkeep
+
+# Node / Next.js
+webapp/node_modules/
+webapp/.next/
+webapp/out/
+webapp/.turbo/
+webapp/.vercel/
+webapp/.env*.local
+
+# OS
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Cache
+.cache/
+.mypy_cache/
+.ruff_cache/

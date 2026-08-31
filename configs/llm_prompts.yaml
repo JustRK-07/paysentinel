@@ -1,0 +1,70 @@
+# PaySentinel — LLM prompt templates (canonical source).
+# These are the prompts used by generate/narrative_agents.py and voice_sim.py.
+# Kept here for reference and easy editing; the live strings live in code.
+
+phishing_email:
+  system: |
+    You generate realistic, personalized phishing emails used in fraud red-teaming.
+    Output ONLY the email — no commentary, no JSON wrapping. Make it plausible,
+    with realistic grammar and one or two subtle tells (urgency, off-domain sender,
+    vague greeting). Do not include placeholders or <brackets>.
+  user_template: |
+    Write a personalized spear-phishing email targeting {victim_role} at {victim_company}.
+    The pretext: {pretext}.
+    Include: a one-sentence LinkedIn-derived hook, urgency, a single call-to-action link,
+    and a soft brand impersonation (one of: Microsoft, DocuSign, FedEx, a generic bank).
+    Total length 90-140 words.
+
+    Victim:
+    - Role: {victim_role}
+    - Company: {victim_company}
+    - Recent activity (for personalization hook): {victim_hook}
+
+scam_call_script:
+  system: |
+    You generate realistic, multi-turn scam call transcripts used in fraud red-teaming.
+    Output a JSON object with keys 'turns' (array of {role: 'scammer'|'victim', text: string})
+    and 'goal' (string). 8-14 turns. Build rapport, escalate pressure, route to payment.
+    Plausible English, no placeholders.
+  user_template: |
+    Multi-turn scam call script targeting {victim_persona}. Pretext: {pretext}.
+    Final goal: route victim to {goal}.
+    Output JSON with 'turns' and 'goal' keys.
+
+synthetic_identity:
+  system: |
+    Generate a synthetic identity profile (JSON) used in fraud red-teaming.
+    Keys: full_name, ssn (real-format, fictional), dob, address, email, phone,
+    occupation, employer, device_fingerprint, behavioral_pattern, intended_use.
+    Make it internally consistent and plausible.
+  user_template: |
+    Synthetic identity profile for red-teaming.
+    Demographic: {demo}
+    Intended fraud vector: {vector}
+
+kyc_document:
+  system: |
+    Generate a JSON description of a forged KYC document (do NOT generate images).
+    Keys: doc_type, issuing_country, fields, fingerprint_markers, visual_tells.
+    The 'visual_tells' should describe plausible deepfake-forger artefacts.
+  user_template: |
+    Generate a forged KYC document descriptor for red-teaming.
+
+agent_trajectory:
+  system: |
+    Generate a JSON tool-call trace of a rogue AI shopping agent.
+    Keys: 'actions' (list of {step, intent, tool, args, risk_signal}).
+    12-30 actions. Include 1-2 prompt-injection triggered actions.
+  user_template: |
+    Generate a rogue AI shopping agent trajectory.
+
+voice_session:
+  system: |
+    Generate a JSON voice-call session for fraud red-teaming.
+    Keys: caller_id_hash, called_party, channel (ivr|human_agent|video_call),
+    duration_seconds, transcript (short), voice_artifacts (list of strings),
+    liveness_challenge_passed (bool), voiceprint_match_confidence (0-1).
+    Mark 'voice_artifacts' with deepfake tells: micro-pauses, robotic cadence,
+    audio layer seams, breath-pattern anomaly.
+  user_template: |
+    Generate a voice-call session descriptor for fraud red-teaming.
