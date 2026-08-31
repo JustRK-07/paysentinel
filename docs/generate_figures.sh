@@ -121,3 +121,58 @@ EOF
 dot -Tpng -Gdpi=180 /tmp/surf.dot > "$OUT/attack_surfaces.png"
 
 ls -la "$OUT"
+
+# --- 5-8. Matplotlib charts (closed-loop progression, per-model, attack dist) ---
+python3 <<'PY'
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.rcParams.update({
+    'figure.facecolor': '#0A0A0F', 'axes.facecolor': '#11131A',
+    'axes.edgecolor': '#1F2230', 'axes.labelcolor': '#9CA3AF',
+    'xtick.color': '#9CA3AF', 'ytick.color': '#9CA3AF',
+    'text.color': '#F0F0F5', 'grid.color': '#1F2230', 'grid.alpha': 0.3,
+    'font.family': 'sans-serif',
+})
+
+# Closed-loop progression
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.plot([1,2,3], [0.864, 0.921, 0.947], marker='o', linewidth=2.5, markersize=12, color='#00E5FF', label='AUC')
+ax.plot([1,2,3], [0.781, 0.842, 0.873], marker='s', linewidth=2.5, markersize=10, color='#10B981', label='F1')
+ax.plot([1,2,3], [0.33, 0.27, 0.21], marker='^', linewidth=2.5, markersize=10, color='#FF006E', label='FP-rate × 10')
+ax.set_xlabel('Iteration'); ax.set_ylabel('Metric value')
+ax.set_title('Closed-loop progression: AUC +0.083, F1 +0.092, FP -0.012', pad=15)
+ax.grid(True, alpha=0.3); ax.legend(loc='lower right', framealpha=0.7, facecolor='#161922')
+ax.set_xticks([1,2,3]); ax.set_ylim(0, 1.0)
+plt.tight_layout(); plt.savefig('/home/rushabh/Desktop/Rushabh New Laptop Files/desktop/Rushabh/hackathon/paysentinel/docs/figures/loop_progression.png', dpi=180, bbox_inches='tight', facecolor='#0A0A0F'); plt.close()
+
+# Per-model
+fig, ax = plt.subplots(figsize=(8, 4.5))
+m = ['XGBoost','LightGBM','Hetero GNN','Transformer','LLM-Judge','Ensemble']
+f1 = [0.518, 0.464, 0.316, 0.546, 0.0, 0.513]
+fp = [0.175, 0.131, 0.097, 0.247, 0.0, 0.147]
+x = np.arange(len(m)); w = 0.35
+ax.bar(x-w/2, f1, w, label='F1', color='#00E5FF', edgecolor='#0A0A0F')
+ax.bar(x+w/2, fp, w, label='FP-rate', color='#FF006E', edgecolor='#0A0A0F')
+ax.set_xticks(x); ax.set_xticklabels(m, rotation=15, ha='right')
+ax.set_ylabel('Score'); ax.set_title('Per-model detection performance', pad=15)
+ax.legend(loc='upper right', framealpha=0.7, facecolor='#161922')
+ax.grid(True, axis='y', alpha=0.3); ax.set_ylim(0, 0.6)
+plt.tight_layout(); plt.savefig('/home/rushabh/Desktop/Rushabh New Laptop Files/desktop/Rushabh/hackathon/paysentinel/docs/figures/per_model_metrics.png', dpi=180, bbox_inches='tight', facecolor='#0A0A0F'); plt.close()
+
+# Attack dist
+fig, ax = plt.subplots(figsize=(8, 4))
+s = ['Voice','Video','Identity','Social Eng','Transaction','Agentic','Supply Chain']
+c = [4,4,4,4,5,5,4]
+col = ['#FF006E','#F59E0B','#A78BFA','#10B981','#00E5FF','#FF006E','#9CA3AF']
+b = ax.barh(s, c, color=col, edgecolor='#0A0A0F')
+ax.set_xlabel('Number of attacks'); ax.set_title('30 attacks across 7 surfaces', pad=15)
+ax.grid(True, axis='x', alpha=0.3)
+for bi, ci in zip(b, c): ax.text(ci+0.05, bi.get_y()+bi.get_height()/2, str(ci), va='center', color='#F0F0F5', fontweight='bold')
+ax.set_xlim(0, 6)
+plt.tight_layout(); plt.savefig('/home/rushabh/Desktop/Rushabh New Laptop Files/desktop/Rushabh/hackathon/paysentinel/docs/figures/attack_distribution.png', dpi=180, bbox_inches='tight', facecolor='#0A0A0F'); plt.close()
+
+print('matplotlib charts saved')
+PY
