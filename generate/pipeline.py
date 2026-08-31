@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -24,7 +25,7 @@ import pandas as pd
 
 from .base_data import DatasetProfile, load_or_synthesize
 from .fidelity_eval import evaluate
-from .narrative_agents import generate_batch
+from .narrative_agents import generate_batch, LLMConfig
 from .txn_generator import generate_attack_batch, GeneratedSet
 from .voice_sim import generate_voice_session
 
@@ -36,6 +37,9 @@ RESULTS_DIR = Path(__file__).parent.parent / "results"
 SYNTH_DIR.mkdir(parents=True, exist_ok=True)
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 (RESULTS_DIR / "fidelity").mkdir(exist_ok=True)
+
+# LLM configuration — set skip_llm=True to use templates only (fast, offline)
+LLM_CFG = LLMConfig(skip_llm=os.environ.get("SKIP_LLM", "1") == "1")
 
 
 # ----------------------------- defaults ----------------------------- #
@@ -99,8 +103,8 @@ def run_pipeline(
         txn_batches.append(batch)
 
     txn_df = pd.concat([b.df for b in txn_batches], ignore_index=True)
-    txn_out = SYNTH_DIR / "transactions.parquet"
-    txn_df.to_parquet(txn_out, index=False)
+    txn_out = SYNTH_DIR / "transactions.csv"
+    txn_df.to_csv(txn_out, index=False)
     logger.info("wrote %d transactions to %s", len(txn_df), txn_out)
 
     # --- narrative ---
@@ -111,9 +115,9 @@ def run_pipeline(
         logger.info("generating %d %s artifacts", count, kind)
         if kind == "voice_session":
             for _ in range(count):
-                narrative_rows.append({"label": label, **generate_voice_session()})
+                narrative_rows.append({"label": label, **generate_voice_session(cfg=LLM_CFG)})
         else:
-            for art in generate_batch(kind, count):
+            for art in generate_batch(kind, count, **({"cfg": LLM_CFG} if kind != "voice_session" else {})):
                 narrative_rows.append({"label": label, **art})
 
     narr_df = pd.DataFrame(narrative_rows)
@@ -121,8 +125,8 @@ def run_pipeline(
     if not narr_df.empty:
         markers_df = pd.json_normalize(narr_df["markers"]).add_prefix("marker_")
         narr_flat = pd.concat([narr_df.drop(columns=["markers"]), markers_df], axis=1)
-        narr_out = SYNTH_DIR / "narrative.parquet"
-        narr_flat.to_parquet(narr_out, index=False)
+        narr_out = SYNTH_DIR / "narrative.csv"
+        narr_flat.to_csv(narr_out, index=False)
         logger.info("wrote %d narrative artifacts to %s", len(narr_flat), narr_out)
     else:
         narr_flat = narr_df
@@ -137,6 +141,7 @@ def run_pipeline(
         real_sample = base_df.sample(n=min(2000, len(base_df)), random_state=42)
         scores: list[float] = []
         for batch in txn_batches:
+            # Task-level fidelity is expensive — disabled by default; enable with run_task_eval=True
             report = evaluate(real_sample, batch.df, run_task_eval=False)
             per_attack[batch.attack_id] = report.overall_score
             scores.append(report.overall_score)

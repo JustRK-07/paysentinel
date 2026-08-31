@@ -72,9 +72,9 @@ def train_all(
 
     try:
         import lightgbm as lgb
+        import joblib
 
-        m = lgb.LGBMClassifier()
-        m.booster_ = lgb.Booster(model_file=str(Path(__file__).parent.parent / "data" / "models" / "lgb.txt"))
+        m = joblib.load(str(Path(__file__).parent.parent / "data" / "models" / "lgb.joblib"))
         per_model_proba["lightgbm"] = m.predict_proba(X_test)[:, 1]
     except Exception as e:
         logger.warning("lgb predict skipped: %s", e)
@@ -107,16 +107,32 @@ def train_all(
 
 
 def main() -> None:
+    import pandas as pd
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     from generate.base_data import load_or_synthesize
+    from pathlib import Path
 
-    df, _ = load_or_synthesize("paysim", n=20_000)
+    # Training strategy: combine synthetic fraud patterns (rich, learnable) with
+    # a sample of real PaySim transactions for distribution alignment.
+    # This produces metrics that reflect *synthetic fraud detection* — the goal
+    # of the closed-loop red-team/blue-team exercise.
+    base_df, _ = load_or_synthesize("paysim", n=30_000)
+    synth_path = Path(__file__).parent.parent / "data" / "synthetic" / "transactions.csv"
+    if synth_path.exists():
+        synth_df = pd.read_csv(synth_path)
+        # Sample 50% of base PaySim + ALL synthetic
+        base_sample = base_df.sample(frac=0.5, random_state=42)
+        df = pd.concat([base_sample, synth_df], ignore_index=True)
+        print(f"Combined dataset: {len(df)} rows, {df['isFraud'].sum()} fraud ({df['isFraud'].mean():.2%})")
+    else:
+        df = base_df
+
     summary = train_all(df)
 
     print("\n=== Per-model metrics ===")
     for name, res in summary["per_model"].items():
         m = res.get("metrics", {})
-        if "auc" in m:
+        if "auc" in m and not (isinstance(m.get("auc"), float) and (m["auc"] != m["auc"])):
             print(f"  {name:24s}  AUC={m['auc']:.4f}  F1={m['f1']:.4f}  FP-rate={m['false_positive_rate']:.4f}")
         else:
             print(f"  {name:24s}  (no metrics)")

@@ -1,17 +1,12 @@
 """
 FastAPI scoring service — real-time fraud decisioning.
 
-POST /score        — score one or many transactions (tabular)
-POST /score/text   — score one or many narrative artifacts (LLM-judge)
-POST /score/batch  — score a mix
-GET  /health       — health + model status
-GET  /metrics      — last evaluation metrics
-
-Mirrors industry-standard real-time decisioning APIs:
-  • Single transaction scoring endpoint
-  • Batch scoring
-  • Decision recommendation (approve / review / block)
-  • Top contributing features per prediction
+POST /score          — score one or many transactions (tabular)
+POST /score/text     — score one or many narrative artifacts (LLM-judge)
+POST /score/batch    — score a mix
+GET  /score/recent   — last N scored transactions (live stream)
+GET  /health         — health + model status
+GET  /metrics        — last evaluation metrics
 """
 
 from __future__ import annotations
@@ -19,6 +14,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+from collections import deque
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +37,9 @@ logger = logging.getLogger(__name__)
 
 RESULTS_DIR = Path(__file__).parent.parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
+
+# In-memory ring buffer of the last N scored transactions — used by /score/recent
+_RECENT: deque = deque(maxlen=50)
 
 
 # ----------------------------- schemas ----------------------------- #
@@ -142,9 +141,22 @@ def _try_load_models() -> dict[str, Any]:
         try:
             import lightgbm as lgb
 
-            m = lgb.LGBMClassifier()
-            m.booster_ = lgb.Booster(model_file=str(lgb_path))
-            cache["lightgbm"] = m
+            # Use joblib to reload the full pickled model
+            try:
+                import joblib
+
+                m = joblib.load(str(model_dir / "lgb.joblib"))
+                cache["lightgbm"] = m
+            except Exception:
+                # Fallback: load just the booster, wrap in a thin classifier
+                booster = lgb.Booster(model_file=str(lgb_path))
+                m = lgb.LGBMClassifier()
+                # sklearn API uses private _Booster; use BoosterModel wrapper
+                m._Booster = booster
+                m.fitted_ = True
+                m._n_classes = 2
+                m.classes_ = np.array([0, 1])
+                cache["lightgbm"] = m
         except Exception as e:
             logger.warning("lgb load failed: %s", e)
 
@@ -223,16 +235,34 @@ def score(req: ScoreRequest) -> ScoreResponse:
                     top_features = explain_with_shap(primary, X[i], feat_cols)
             except Exception:
                 top_features = None
-        rows.append(
-            ScoreRow(
-                score=float(score),
-                decision=decision(float(score), cfg),
-                latency_ms=per_row_latency,
-                top_features=top_features,
-            )
+        score_row = ScoreRow(
+            score=float(score),
+            decision=decision(float(score), cfg),
+            latency_ms=per_row_latency,
+            top_features=top_features,
         )
+        rows.append(score_row)
+        # Update live stream buffer
+        try:
+            _RECENT.append({
+                "txn_id": f"T-{int(time.time() * 1000) % 100000}-{i}",
+                "amount": float(req.transactions[i].amount or 0),
+                "score": float(score),
+                "decision": score_row.decision,
+                "top_feature": top_features[0]["feature"] if top_features else "n/a",
+                "ts": time.time(),
+            })
+        except Exception:
+            pass
 
     return ScoreResponse(count=len(rows), avg_latency_ms=per_row_latency, rows=rows)
+
+
+@app.get("/score/recent")
+def score_recent(n: int = 20) -> dict[str, Any]:
+    """Return the most recently scored transactions (live stream)."""
+    items = list(_RECENT)[-n:]
+    return {"count": len(items), "items": items}
 
 
 @app.post("/score/text", response_model=TextScoreResponse)
@@ -259,9 +289,11 @@ def score_text(req: TextScoreRequest) -> TextScoreResponse:
 
 
 def main() -> None:
+    import os
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.environ.get("DEFEND_API_PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
 if __name__ == "__main__":

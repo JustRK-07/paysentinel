@@ -95,15 +95,24 @@ def train_xgboost(
         df, label_col, test_size=test_size, random_state=random_state
     )
 
+    # Class weighting: scale positive class by inverse prevalence
+    n_pos = int((y_train == 1).sum())
+    n_neg = int((y_train == 0).sum())
+    scale_pos = max(1.0, n_neg / max(1, n_pos)) if n_pos > 0 else 1.0
+
     model = XGBClassifier(
-        n_estimators=300,
-        max_depth=7,
+        n_estimators=400,
+        max_depth=6,
         learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        eval_metric="logloss",
+        subsample=0.85,
+        colsample_bytree=0.85,
+        eval_metric="aucpr",
         random_state=random_state,
         tree_method="hist",
+        scale_pos_weight=scale_pos,
+        min_child_weight=3,
+        reg_alpha=0.1,
+        reg_lambda=1.0,
     )
     model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
     y_proba = model.predict_proba(X_test)[:, 1]
@@ -149,13 +158,17 @@ def train_lightgbm(
     )
 
     model = lgb.LGBMClassifier(
-        n_estimators=300,
-        max_depth=7,
+        n_estimators=400,
+        max_depth=6,
         learning_rate=0.05,
-        subsample=0.8,
-        colsample_bytree=0.8,
+        subsample=0.85,
+        colsample_bytree=0.85,
         random_state=random_state,
         verbose=-1,
+        class_weight="balanced",
+        min_child_samples=10,
+        reg_alpha=0.1,
+        reg_lambda=1.0,
     )
     model.fit(X_train, y_train, eval_set=[(X_test, y_test)], callbacks=[lgb.early_stopping(20, verbose=False)])
     y_proba = model.predict_proba(X_test)[:, 1]
@@ -165,8 +178,10 @@ def train_lightgbm(
     importance = dict(sorted(importance.items(), key=lambda kv: kv[1], reverse=True)[:15])
 
     if save:
-        path = MODELS_DIR / "lgb.txt"
-        model.booster_.save_model(str(path))
+        path = MODELS_DIR / "lgb.joblib"
+        import joblib
+
+        joblib.dump(model, str(path))
         logger.info("saved LightGBM to %s", path)
 
     return TrainResult(

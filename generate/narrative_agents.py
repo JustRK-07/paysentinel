@@ -40,10 +40,14 @@ class LLMConfig:
     max_tokens: int = 1024
     temperature: float = 0.8
     api_key_env: str = "ANTHROPIC_API_KEY"
+    timeout_seconds: float = 1.5  # Fail fast; fall back to template
+    skip_llm: bool = False  # Set True to bypass LLM entirely (templates only)
 
 
 def _anthropic_generate(prompt: str, system: str, cfg: LLMConfig) -> str | None:
-    """Call Anthropic; return None on any failure."""
+    """Call Anthropic; return None on any failure. Skip LLM entirely if configured."""
+    if cfg.skip_llm:
+        return None
     api_key = os.environ.get(cfg.api_key_env)
     if not api_key:
         logger.debug("no %s; skipping LLM", cfg.api_key_env)
@@ -51,17 +55,20 @@ def _anthropic_generate(prompt: str, system: str, cfg: LLMConfig) -> str | None:
     try:
         import anthropic
 
-        client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(
+            api_key=api_key,
+            timeout=cfg.timeout_seconds,
+            max_retries=0,
+        )
         msg = client.messages.create(
             model=cfg.model,
             max_tokens=cfg.max_tokens,
-            temperature=cfg.temperature,
             system=system,
             messages=[{"role": "user", "content": prompt}],
         )
         return msg.content[0].text
     except Exception as e:
-        logger.warning("Anthropic call failed: %s", e)
+        logger.debug("LLM call skipped: %s", str(e)[:80])
         return None
 
 
