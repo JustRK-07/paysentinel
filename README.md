@@ -4,6 +4,8 @@
 
 Identify novel fraud attacks → generate realistic simulations → defend with an ensemble detector — all in one closed feedback loop.
 
+> 📄 **Full solution writeup:** [solution.md](solution.md) — problem statement, four-pillar deep-dive, benchmark table, tech stack, reproducibility. The README below is the short tour.
+
 ![architecture](docs/figures/architecture.png)
 
 ---
@@ -44,6 +46,7 @@ defend/      → 5-model stacking ensemble + FastAPI /score /score/text /score/r
 closed_loop/ → failure → seed → retrain pipeline
 webapp/      → Next.js 14 prototype, 7 pages, cyber-noir dark theme
 docs/        → Solution_Walkthrough.docx + 7 architecture diagrams + writeup script
+solution.md  → full writeup (problem, pillars, benchmark, tech stack, repro)
 ```
 
 ---
