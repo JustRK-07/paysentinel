@@ -1,0 +1,548 @@
+{
+  "$schema": "https://paysentinel.dev/schemas/attack-catalog-v1.json",
+  "name": "PaySentinel Attack Catalog",
+  "version": "1.0.0",
+  "description": "30 novel GenAI-powered payment fraud vectors, mapped to MITRE ATLAS, with real-world cases and suggested defenses.",
+  "methodology": "Each attack is grounded in a documented incident or vendor threat report. Severity and likelihood are subjective ratings informed by 2025-2026 industry data (FBI, Arkose Labs, FATF, Incode).",
+  "surfaces": [
+    "voice",
+    "video",
+    "identity",
+    "social_engineering",
+    "transaction",
+    "agentic_commerce",
+    "supply_chain"
+  ],
+  "mitre_atlas_tactics_covered": [
+    "AML.TA0001 - Reconnaissance",
+    "AML.TA0002 - Resource Development",
+    "AML.TA0003 - Initial Access",
+    "AML.TA0004 - ML Model Access",
+    "AML.TA0006 - Persistence",
+    "AML.TA0007 - Defense Evasion",
+    "AML.TA0008 - Discovery",
+    "AML.TA0009 - Collection",
+    "AML.TA0010 - ML Attack Staging",
+    "AML.TA0011 - Exfiltration",
+    "AML.TA0012 - Impact"
+  ],
+  "stats": {
+    "total_attacks": 30,
+    "surfaces": 7,
+    "tactics_covered": 11,
+    "total_tactics": 14,
+    "coverage_pct": 78.6
+  },
+  "attacks": [
+    {
+      "id": "PSF-001",
+      "name": "CFO Wire-Transfer Deepfake",
+      "surface": "voice",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0024", "AML.T0043"],
+      "real_case": {
+        "title": "Arup $25M deepfake wire transfer",
+        "year": 2024,
+        "source": "https://www.arkoselabs.com/blog/the-financial-cost-of-agentic-ai-fraud"
+      },
+      "mechanics": "Adversary scrapes 30-60 sec of target exec voice from earnings calls/interviews, fine-tunes TTS, places live call requesting urgent wire.",
+      "indicators": ["urgency", "new_beneficiary", "verbal_only_authorization", "audio_artifacts"],
+      "suggested_defense": ["out_of_band_callback", "voice_liveness", "behavioral_biometrics"],
+      "simulatable_by": ["voice_sim", "transcript_generator"]
+    },
+    {
+      "id": "PSF-002",
+      "name": "IVR / KYC Voice Bypass",
+      "surface": "voice",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "FBI Jan 2025 warning on live deepfake KYC bypass",
+        "year": 2025,
+        "source": "https://www.arkoselabs.com/blog/the-financial-cost-of-agentic-ai-fraud"
+      },
+      "mechanics": "Voice clone passes IVR voice authentication step, then performs account actions.",
+      "indicators": ["voiceprint_match_failure", "missing_liveness_challenge", "geo_anomaly"],
+      "suggested_defense": ["cryptographic_device_bound_factor", "liveness_challenge"],
+      "simulatable_by": ["transcript_generator", "behavioral_log_synth"]
+    },
+    {
+      "id": "PSF-003",
+      "name": "Family-Emergency Voice Clone Scam",
+      "surface": "voice",
+      "severity": "high",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0043", "AML.T0051"],
+      "real_case": {
+        "title": "Tennessee 73-year-old $3K voice clone scam",
+        "year": 2025,
+        "source": "https://www.arkoselabs.com/blog/the-financial-cost-of-agentic-ai-fraud"
+      },
+      "mechanics": "Scammer clones family member's voice from social-media audio, calls grandparent requesting P2P wire/gift cards.",
+      "indicators": ["first_time_beneficiary", "p2p_rail", "high_velocity_1h"],
+      "suggested_defense": ["consumer_education", "first_time_p2p_friction", "velocity_ml"],
+      "simulatable_by": ["narrative_agents.scam_call_script"]
+    },
+    {
+      "id": "PSF-004",
+      "name": "Voice-Reset Account Takeover",
+      "surface": "voice",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "Multiple US carrier SIM-swap + voice clone cases",
+        "year": "2024-2025",
+        "source": "FBI IC3 reports"
+      },
+      "mechanics": "SIM-swap target, receive SMS 2FA, use voice clone for voice-based reset step, full ATO.",
+      "indicators": ["sim_swap_signal", "voice_auth_event_same_hour"],
+      "suggested_defense": ["sim_swap_aware_step_up", "device_binding"],
+      "simulatable_by": ["behavioral_log_synth"]
+    },
+    {
+      "id": "PSF-005",
+      "name": "Real-Time Deepfake Video Conference",
+      "surface": "video",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0043", "AML.T0024"],
+      "real_case": {
+        "title": "Ferrari CEO impersonation video call",
+        "year": 2024,
+        "source": "https://www.arkoselabs.com/blog/the-financial-cost-of-agentic-ai-fraud"
+      },
+      "mechanics": "Live deepfake joins Teams/Zoom, approves payment mid-call. Other 'executives' may also be deepfakes.",
+      "indicators": ["single_low_motion_participant", "new_ip_geo", "verbal_only_approval", "new_beneficiary"],
+      "suggested_defense": ["out_of_band_callback", "challenge_response", "dual_control_approval"],
+      "simulatable_by": ["transcript_generator", "meeting_metadata_synth"]
+    },
+    {
+      "id": "PSF-006",
+      "name": "Selfie-KYC Deepfake Bypass",
+      "surface": "video",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "FBI Jan 2025 warning - AI bypasses standard selfie-KYC",
+        "year": 2025,
+        "source": "https://www.arkoselabs.com/blog/the-financial-cost-of-agentic-ai-fraud"
+      },
+      "mechanics": "Real-time deepfake + ID template (Midjourney) passes liveness checks.",
+      "indicators": ["liveness_below_threshold", "device_fingerprint_anomaly", "pii_inconsistency"],
+      "suggested_defense": ["multi_modal_liveness", "device_attestation", "pii_consistency_ml"],
+      "simulatable_by": ["metadata_generator"]
+    },
+    {
+      "id": "PSF-007",
+      "name": "Synthetic Livestream Checkout Fraud",
+      "surface": "video",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "Influencer-stream checkout fraud, deepfake variant 2025-2026",
+        "year": "2025-2026",
+        "source": "China e-commerce fraud reports"
+      },
+      "mechanics": "Deepfake of popular streamer runs fake giveaway; viewers enter card details.",
+      "indicators": ["card_bin_velocity_spike_single_stream", "high_refund_rate_after"],
+      "suggested_defense": ["stream_attestation", "merchant_bin_velocity_caps"],
+      "simulatable_by": ["txn_pattern_generator"]
+    },
+    {
+      "id": "PSF-008",
+      "name": "Screen-Share Deepfake in Support Call",
+      "surface": "video",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "Increasingly reported by support teams 2024-2025",
+        "year": "2024-2025",
+        "source": "Industry support-fraud reports"
+      },
+      "mechanics": "Caller claims to be customer, deepfakes face on screen share, convinces agent to reset MFA.",
+      "indicators": ["reset_request_during_screen_share", "no_mfa_fallback"],
+      "suggested_defense": ["no_mfa_reset_during_screen_share", "pre_registered_device_required"],
+      "simulatable_by": ["transcript_generator", "event_log_synth"]
+    },
+    {
+      "id": "PSF-009",
+      "name": "Synthetic Identity Stitching",
+      "surface": "identity",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": [],
+      "real_case": {
+        "title": "Synthetic identity fraud = up to 80% of CC fraud losses in some portfolios",
+        "year": "2025",
+        "source": "https://www.arkoselabs.com/blog/the-financial-cost-of-agentic-ai-fraud"
+      },
+      "mechanics": "Real SSN from child/deceased + AI-generated face + AI-generated documents. Builds credit 12-24 months ('pig butchering'), then busts out.",
+      "indicators": ["thin_file", "rapid_credit_line_growth", "velocity_across_products"],
+      "suggested_defense": ["entity_linkage_gnn", "piggyback_detection"],
+      "simulatable_by": ["narrative_agents.synthetic_identity"]
+    },
+    {
+      "id": "PSF-010",
+      "name": "AI-Generated Forged Documents",
+      "surface": "identity",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "UNODC report - AI-generated CSAM up 600% YoY, same tooling used for financial docs",
+        "year": 2025,
+        "source": "UNODC report"
+      },
+      "mechanics": "SDXL fine-tuned on passport/utility/pay-stub template generates believable forgery in seconds.",
+      "indicators": ["metadata_absence", "template_match_forgery_pattern"],
+      "suggested_defense": ["document_tampering_ml", "holographic_verification"],
+      "simulatable_by": ["metadata_generator", "visual_feature_descriptor"]
+    },
+    {
+      "id": "PSF-011",
+      "name": "Synthetic BIN Attacks",
+      "surface": "identity",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": [],
+      "real_case": {
+        "title": "BIN attacks documented across Visa/MC networks for >15 years; AI accelerates target identification",
+        "year": "ongoing",
+        "source": "Card network fraud reports"
+      },
+      "mechanics": "Adversary enumerates likely-valid card ranges using generative model trained on leaked BIN patterns.",
+      "indicators": ["card_testing_velocity_single_source", "micro_transactions_under_threshold"],
+      "suggested_defense": ["card_testing_detectors", "velocity_caps_low_value"],
+      "simulatable_by": ["txn_pattern_generator"]
+    },
+    {
+      "id": "PSF-012",
+      "name": "Biometric Replay Attack",
+      "surface": "identity",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "Biometric spoofing across face/fingerprint/voice modalities",
+        "year": "ongoing",
+        "source": "NIST FRVT/PAD benchmarks"
+      },
+      "mechanics": "Recorded or AI-generated biometric replayed against authentication.",
+      "indicators": ["liveness_failure", "presentation_attack_detection_score"],
+      "suggested_defense": ["pad_hardware", "multi_modal_liveness"],
+      "simulatable_by": ["behavioral_log_synth"]
+    },
+    {
+      "id": "PSF-013",
+      "name": "LLM-Personalized Spear Phishing",
+      "surface": "social_engineering",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0029"],
+      "real_case": {
+        "title": "Nation-state and financial actors use LLMs to scale hyper-personal phishing",
+        "year": "2024-2025",
+        "source": "Anthropic / OpenAI threat reports"
+      },
+      "mechanics": "LLM scrapes LinkedIn/Twitter/recent transactions, generates phishing tailored to current context.",
+      "indicators": ["high_specificity_to_victim", "off_brand_sender_domain"],
+      "suggested_defense": ["llm_as_judge_inbound_mail", "dmarc_enforcement", "behavioral_email_analytics"],
+      "simulatable_by": ["narrative_agents.phishing_email"]
+    },
+    {
+      "id": "PSF-014",
+      "name": "Multi-Turn Scam Agent (ScamAgent-style)",
+      "surface": "social_engineering",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0051"],
+      "real_case": {
+        "title": "ScamAgent (arXiv 2508.06457) - autonomous multi-turn scam calls",
+        "year": 2025,
+        "source": "https://arxiv.org/html/2508.06457v1"
+      },
+      "mechanics": "LLM agent runs entire conversation: greeting, rapport, pressure escalation, payment routing.",
+      "indicators": ["long_call_duration", "high_emotional_volatility", "payment_routing_mid_call"],
+      "suggested_defense": ["real_time_conversation_analytics", "call_transcript_ml", "agentic_detection"],
+      "simulatable_by": ["narrative_agents.scam_call_script"]
+    },
+    {
+      "id": "PSF-015",
+      "name": "Quishing (AI-Generated QR Payloads)",
+      "surface": "social_engineering",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0029"],
+      "real_case": {
+        "title": "QR phishing up 10x in some regions 2024-2025",
+        "year": "2024-2025",
+        "source": "Anti-Phishing Working Group"
+      },
+      "mechanics": "LLM-generated email + AI-crafted QR code + stolen brand asset.",
+      "indicators": ["qr_code_primary_cta", "encoded_url_new_domain"],
+      "suggested_defense": ["url_extraction_qr", "reputation_check"],
+      "simulatable_by": ["email_template_generator"]
+    },
+    {
+      "id": "PSF-016",
+      "name": "Fake Customer Support Voice Bot",
+      "surface": "social_engineering",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "Multiple customer-support impersonation cases 2024-2025",
+        "year": "2024-2025",
+        "source": "Bank fraud-team reports"
+      },
+      "mechanics": "LLM voice agent impersonates bank's support line; walks victim through credential disclosure.",
+      "indicators": ["inbound_then_outbound", "voice_mismatch_brand_voice"],
+      "suggested_defense": ["no_credential_disclosure_after_outbound"],
+      "simulatable_by": ["transcript_generator"]
+    },
+    {
+      "id": "PSF-017",
+      "name": "Micro-Split Transaction Laundering",
+      "surface": "transaction",
+      "severity": "high",
+      "likelihood": "high",
+      "mitre_atlas": [],
+      "real_case": {
+        "title": "Documented in FATF typologies 2023-2025",
+        "year": "2023-2025",
+        "source": "FATF"
+      },
+      "mechanics": "Break large fraudulent transfer into N micro-transactions under threshold, routed through synthetic accounts.",
+      "indicators": ["many_same_source_to_many_destinations", "similar_amounts", "sub_threshold", "within_minutes"],
+      "suggested_defense": ["graph_pattern_detection", "velocity_aggregation_window"],
+      "simulatable_by": ["txn_generator.smurfing_pattern"]
+    },
+    {
+      "id": "PSF-018",
+      "name": "Automated Card Testing",
+      "surface": "transaction",
+      "severity": "high",
+      "likelihood": "high",
+      "mitre_atlas": [],
+      "real_case": {
+        "title": "Continuous across card networks",
+        "year": "ongoing",
+        "source": "Card network reports"
+      },
+      "mechanics": "LLM-driven bot enumerates stolen cards, tests small amounts at thousands of merchants in parallel.",
+      "indicators": ["many_small_declines_unrelated_merchants_short_window"],
+      "suggested_defense": ["per_card_velocity", "behavioral_merchant_affinity"],
+      "simulatable_by": ["txn_pattern_generator"]
+    },
+    {
+      "id": "PSF-019",
+      "name": "Refund / Chargeback Fraud with AI Evidence",
+      "surface": "transaction",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": [],
+      "real_case": {
+        "title": "AI-generated dispute evidence reported by issuer fraud teams 2024-2025",
+        "year": "2024-2025",
+        "source": "Issuer fraud reports"
+      },
+      "mechanics": "Buyer claims non-receipt, generates fake shipping confirmation/courier chat/photo via AI, files chargeback.",
+      "indicators": ["evidence_missing_exif", "ai_generation_fingerprints", "courier_chat_mismatch"],
+      "suggested_defense": ["image_forensics_ml", "cross_validate_courier_metadata"],
+      "simulatable_by": ["evidence_metadata_synth"]
+    },
+    {
+      "id": "PSF-020",
+      "name": "Transaction Replay",
+      "surface": "transaction",
+      "severity": "medium",
+      "likelihood": "medium",
+      "mitre_atlas": [],
+      "real_case": {
+        "title": "Known across NFC/QR/token rails",
+        "year": "ongoing",
+        "source": "EMVCo"
+      },
+      "mechanics": "Capture valid tokenized transaction, replay at different merchant/time.",
+      "indicators": ["cryptogram_replay_detection"],
+      "suggested_defense": ["token_bound_cryptograms", "device_attestation"],
+      "simulatable_by": ["replay_pattern_generator"]
+    },
+    {
+      "id": "PSF-021",
+      "name": "Gift Card Laundering with AI Agents",
+      "surface": "transaction",
+      "severity": "medium",
+      "likelihood": "high",
+      "mitre_atlas": [],
+      "real_case": {
+        "title": "FTC reported $228M lost to gift card scams in 2023; AI agents accelerate",
+        "year": 2023,
+        "source": "FTC"
+      },
+      "mechanics": "Scam script (PSF-014) routes victim to buy gift cards, share codes, agent instantly resells.",
+      "indicators": ["activation_code_redeemed_distant_reseller_minutes"],
+      "suggested_defense": ["activation_velocity", "resale_graph_detection"],
+      "simulatable_by": ["pattern_generator"]
+    },
+    {
+      "id": "PSF-022",
+      "name": "Rogue AI Shopping Agent",
+      "surface": "agentic_commerce",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0051"],
+      "real_case": {
+        "title": "Incode Aug 2026 - AI agents drive 40% of fraud, heading to 90% by 2028",
+        "year": 2026,
+        "source": "https://ffnews.com/news/agentic-fraud-to-exceed-90-of-all-attacks-by-2028-as-incode-warns-of-ai-driven-surge"
+      },
+      "mechanics": "Adversary hijacks or impersonates user's AI shopping agent; agent executes purchases at scale.",
+      "indicators": ["spending_velocity_deviates_from_user_profile", "agent_decisions_mismatch_user_history"],
+      "suggested_defense": ["agent_identity_attestation", "spend_ceilings_per_agent", "per_decision_risk_scoring"],
+      "simulatable_by": ["agent_trajectory_generator"]
+    },
+    {
+      "id": "PSF-023",
+      "name": "Agent Prompt Injection in Checkout Flow",
+      "surface": "agentic_commerce",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0051"],
+      "real_case": {
+        "title": "MITRE ATLAS AML.T0051 - LLM Prompt Injection is primary AI red-team technique",
+        "year": "2024-2025",
+        "source": "https://atlas.mitre.org/"
+      },
+      "mechanics": "Inject instructions into product description/chat history/tool result, agent interprets as legitimate, exfiltrates payment data or transfers funds.",
+      "indicators": ["tool_call_args_deviate_from_intent", "untrusted_tool_result_triggers_financial_action"],
+      "suggested_defense": ["stricter_tool_call_authorization", "instruction_data_separation"],
+      "simulatable_by": ["tool_call_trace_generator"]
+    },
+    {
+      "id": "PSF-024",
+      "name": "Cross-Agent Collusion",
+      "surface": "agentic_commerce",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0051"],
+      "real_case": {
+        "title": "Theoretical as of 2025; first observed cases 2026",
+        "year": "2026",
+        "source": "Emerging threat reports"
+      },
+      "mechanics": "Two compromised agents (one buyer, one seller) execute mutually-beneficial transactions; both individually look normal.",
+      "indicators": ["counterparty_graph_density_anomaly", "mutual_beneficial_scoring"],
+      "suggested_defense": ["counterparty_graph_analytics"],
+      "simulatable_by": ["paired_agent_trace_generator"]
+    },
+    {
+      "id": "PSF-025",
+      "name": "Autonomous Subscription Manipulation",
+      "surface": "agentic_commerce",
+      "severity": "medium",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0051"],
+      "real_case": {
+        "title": "Emerging with proliferation of subscription-managing AI agents",
+        "year": "2025-2026",
+        "source": "Industry reports"
+      },
+      "mechanics": "Agent signs up for many overlapping subscriptions with overlapping trials, harvesting credits.",
+      "indicators": ["subscription_creation_velocity", "same_card_cross_merchant_pattern"],
+      "suggested_defense": ["subscription_velocity_cap_per_card"],
+      "simulatable_by": ["subscription_pattern_generator"]
+    },
+    {
+      "id": "PSF-026",
+      "name": "Agent-as-Mule (Money Muling via Agent Networks)",
+      "surface": "agentic_commerce",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0051"],
+      "real_case": {
+        "title": "FATF typology 2024 - AI agents recruited into mule networks",
+        "year": 2024,
+        "source": "FATF"
+      },
+      "mechanics": "Agent (or compromised agent) routes payments across many small accounts, hiding origin of funds.",
+      "indicators": ["agent_transaction_graph_high_path_betweenness"],
+      "suggested_defense": ["graph_money_mule_detection"],
+      "simulatable_by": ["money_mule_graph_generator"]
+    },
+    {
+      "id": "PSF-027",
+      "name": "Poisoned RAG for Fraud Assistant",
+      "surface": "supply_chain",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0020", "AML.T0046"],
+      "real_case": {
+        "title": "Demonstrated in academic settings 2024; expected to grow",
+        "year": 2024,
+        "source": "Academic research"
+      },
+      "mechanics": "Adversary injects documents into fraud-investigation RAG corpus that mislead assistant into recommending 'approve' for known fraud patterns.",
+      "indicators": ["recently_added_low_authority_sources", "assistant_rationale_diverges_from_analyst"],
+      "suggested_defense": ["source_provenance", "audit_trail_rag_updates"],
+      "simulatable_by": ["rag_corpus_perturbation_generator"]
+    },
+    {
+      "id": "PSF-028",
+      "name": "Model API Key Theft",
+      "surface": "supply_chain",
+      "severity": "critical",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0008"],
+      "real_case": {
+        "title": "Multiple LLM provider breaches 2024-2025",
+        "year": "2024-2025",
+        "source": "Public breach disclosures"
+      },
+      "mechanics": "Adversary steals bank's internal fraud-detection model API key, uses it for adversarial probing/model inversion.",
+      "indicators": ["api_call_pattern_anomaly", "error_response_spike"],
+      "suggested_defense": ["api_key_rotation", "rate_limit_per_identity", "api_usage_anomaly"],
+      "simulatable_by": ["api_call_log_generator"]
+    },
+    {
+      "id": "PSF-029",
+      "name": "Jailbroken Fraud LLM",
+      "surface": "supply_chain",
+      "severity": "high",
+      "likelihood": "medium",
+      "mitre_atlas": ["AML.T0051"],
+      "real_case": {
+        "title": "'FraudGPT' / 'WormGPT' listed on dark-web forums 2023-2025",
+        "year": "2023-2025",
+        "source": "Dark-web research"
+      },
+      "mechanics": "Adversary uses fine-tuned jailbroken LLM to generate fraud scripts, phishing, money-laundering plans at scale.",
+      "indicators": ["jailbroken_llm_stylistic_markers"],
+      "suggested_defense": ["stylometric_ml", "linguistic_ml", "prompt_injection_classifier"],
+      "simulatable_by": ["narrative_agents.scam_call_script"]
+    },
+    {
+      "id": "PSF-030",
+      "name": "Deepfake-as-a-Service (Fraud Tooling Market)",
+      "surface": "supply_chain",
+      "severity": "critical",
+      "likelihood": "high",
+      "mitre_atlas": ["AML.T0043"],
+      "real_case": {
+        "title": "Dark-web marketplaces sell voice-clone kits for $5-$50",
+        "year": "2024-2025",
+        "source": "Dark-web market research"
+      },
+      "mechanics": "Off-the-shelf tooling lowers attacker cost from weeks of ML work to minutes.",
+      "indicators": ["operational_artifact_patterns_specific_to_off_the_shelf_tools"],
+      "suggested_defense": ["tool_fingerprint_ml"],
+      "simulatable_by": ["tool_fingerprint_metadata_generator"]
+    }
+  ]
+}
