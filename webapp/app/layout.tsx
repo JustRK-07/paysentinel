@@ -9,8 +9,30 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "PaySentinel — Agentic Red-Team Lab",
-  description: "Identify, generate, and defend against GenAI-powered payment fraud.",
+  title: "PaySentinel — Agentic Red-Team Lab for GenAI Payment Fraud",
+  description:
+    "Identify novel GenAI payment fraud vectors, generate realistic simulations, and defend with a 5-model ensemble — all in one closed feedback loop. 30 attacks · 7 surfaces · 11/14 MITRE ATLAS tactics covered.",
+  keywords: [
+    "fraud detection",
+    "GenAI",
+    "payment security",
+    "red team",
+    "blue team",
+    "closed loop",
+    "MITRE ATLAS",
+    "deepfake",
+    "voice cloning",
+  ],
+  authors: [{ name: "PaySentinel" }],
+  openGraph: {
+    title: "PaySentinel — Agentic Red-Team Lab",
+    description:
+      "Identify, generate, and defend against GenAI-powered payment fraud. Closed-loop red-team/blue-team with 5-model stacking ensemble.",
+    type: "website",
+  },
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

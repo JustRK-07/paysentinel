@@ -1,12 +1,81 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { AreaChart, Card, Metric, Text, Badge, Grid, Flex, SparkAreaChart } from "@tremor/react";
-import { Activity, AlertTriangle, Cpu, Shield, Zap, TrendingUp } from "lucide-react";
+import { AreaChart, Card, Metric, Text, Badge, Grid, Flex, SparkAreaChart, Button } from "@tremor/react";
+import { Activity, AlertTriangle, Cpu, Shield, Zap, TrendingUp, Crosshair } from "lucide-react";
 import { mockKpis, mockScoreStream, mockRecentAttacks } from "@/lib/mock-data";
 import { MetricTooltip } from "@/components/ui-states";
+import { toast } from "@/components/toast";
 
 export default function DashboardPage() {
+  const [demoing, setDemoing] = useState(false);
+  const [demoResult, setDemoResult] = useState<null | {
+    txn_id: string;
+    score: number;
+    decision: string;
+    top_feature: string;
+    amount: number;
+  }>(null);
+
+  const runSampleFraud = async () => {
+    setDemoing(true);
+    try {
+      const base = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8002";
+      // High-velocity large transfer from a freshly-opened account → typical money-laundering pattern
+      const txn = {
+        step: Math.floor(Math.random() * 168),
+        type: "TRANSFER",
+        amount: 87_500,
+        nameOrig: `C${Math.floor(Math.random() * 999_999)}`,
+        oldbalanceOrg: 87_500,
+        newbalanceOrig: 0,
+        nameDest: `M${Math.floor(Math.random() * 9999)}`,
+        oldbalanceDest: 0,
+        newbalanceDest: 87_500,
+      };
+      const r = await fetch(`${base}/score`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactions: [txn] }),
+      });
+      if (!r.ok) throw new Error(`API ${r.status}`);
+      const j = await r.json();
+      const first = j?.predictions?.[0];
+      if (first) {
+        setDemoResult({
+          txn_id: first.txn_id ?? txn.nameOrig,
+          score: first.score ?? 0,
+          decision: first.decision ?? "review",
+          top_feature: first.top_feature ?? "amount",
+          amount: txn.amount,
+        });
+        toast({
+          title: `Result: ${first.decision?.toUpperCase() ?? "?"} · score ${(first.score ?? 0).toFixed(3)}`,
+          description: `${first.txn_id ?? txn.nameOrig} · $${txn.amount.toLocaleString()}`,
+          variant: first.decision === "block" ? "critical" : first.decision === "review" ? "warning" : "success",
+        });
+      } else {
+        throw new Error("Empty prediction");
+      }
+    } catch (e: any) {
+      // Realistic synthetic fallback when API isn't running — shows the full decision flow
+      const fallback = {
+        txn_id: `T-${Math.floor(Math.random() * 999_999).toString().padStart(6, "0")}-0`,
+        score: 0.847,
+        decision: "review",
+        top_feature: "amount_velocity_ratio",
+        amount: 87_500,
+      };
+      setDemoResult(fallback);
+      toast({
+        title: `Demo result · ${fallback.score.toFixed(3)} (review)`,
+        description: "API offline · showing synthetic demo result. Start the Defend API for live scoring.",
+        variant: "warning",
+      });
+    }
+    setDemoing(false);
+  };
   return (
     <div className="space-y-8">
       {/* Hero */}
@@ -30,6 +99,38 @@ export default function DashboardPage() {
           Identify novel GenAI payment fraud attacks, generate realistic simulations at scale,
           defend with an ensemble detector — all in one closed feedback loop.
         </p>
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <Button
+            icon={Crosshair}
+            onClick={runSampleFraud}
+            loading={demoing}
+            className="shadow-[0_0_24px_-6px_rgba(0,229,255,0.6)]"
+          >
+            Try a sample fraud detection
+          </Button>
+          <span className="text-xs text-fg-muted font-mono">
+            submits $87.5k TRANSFER → ensemble scores it
+          </span>
+        </div>
+        {demoResult && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-3 inline-flex items-center gap-3 rounded-md border border-border bg-elevated px-3 py-2"
+          >
+            <Shield className={`w-4 h-4 ${demoResult.decision === "block" ? "text-accent" : demoResult.decision === "review" ? "text-warning" : "text-success"}`} />
+            <span className="font-mono text-xs">{demoResult.txn_id}</span>
+            <span className="text-xs text-fg-muted">·</span>
+            <span className="font-mono text-xs">${demoResult.amount.toLocaleString()}</span>
+            <span className="text-xs text-fg-muted">·</span>
+            <span className="font-mono text-xs">score {demoResult.score.toFixed(3)}</span>
+            <Badge color={demoResult.decision === "block" ? "red" : demoResult.decision === "review" ? "amber" : "emerald"} className="text-xs">
+              {demoResult.decision}
+            </Badge>
+            <span className="text-xs text-fg-muted">· top feature:</span>
+            <span className="font-mono text-xs text-info">{demoResult.top_feature}</span>
+          </motion.div>
+        )}
       </header>
 
       {/* KPI tiles with sparklines */}
