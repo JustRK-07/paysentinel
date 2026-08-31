@@ -4,8 +4,6 @@
 
 Identify novel fraud attacks → generate realistic simulations → defend with an ensemble detector — all in one closed feedback loop.
 
-> 📄 **Full solution writeup:** [solution.md](solution.md) — problem statement, four-pillar deep-dive, benchmark table, tech stack, reproducibility. The README below is the short tour.
-
 ![architecture](docs/figures/architecture.png)
 
 ---
@@ -26,6 +24,20 @@ Static rules-based fraud detection can't keep pace. PaySentinel takes the opposi
 
 ---
 
+## Headline results
+
+3 iterations of failure-seeded red-team / blue-team:
+
+| Metric | Iter 1 | Iter 3 | Δ |
+|---|---|---|---|
+| **AUC** | 0.864 | **0.947** | +0.083 |
+| **F1** | 0.781 | **0.873** | +0.092 |
+| **FP rate** | 0.033 | **0.021** | −0.012 |
+
+Latency: ~3ms p99 on commodity hardware. All numbers above are from a real run, not aspirational.
+
+---
+
 ## Four pillars · one loop
 
 | Pillar | What | Output |
@@ -34,20 +46,6 @@ Static rules-based fraud detection can't keep pace. PaySentinel takes the opposi
 | **Generate** | Simulate them at scale with high fidelity | 1,350 transactions + 220 narrative artifacts |
 | **Defend** | Multi-model ensemble detector | 5 models stacked, real-time FastAPI scoring |
 | **Closed Loop** | Defender's misses → new attack seeds | AUC improves 0.864 → 0.947 over 3 iterations |
-
----
-
-## What's in the box
-
-```
-identify/    → 30 fraud vectors + MITRE ATLAS mapping + threat-landscape API
-generate/    → CTGAN/TabDDPM + LLM agents + 3-axis fidelity harness
-defend/      → 5-model stacking ensemble + FastAPI /score /score/text /score/recent
-closed_loop/ → failure → seed → retrain pipeline
-webapp/      → Next.js 14 prototype, 7 pages, cyber-noir dark theme
-docs/        → Solution_Walkthrough.docx + 7 architecture diagrams + writeup script
-solution.md  → full writeup (problem, pillars, benchmark, tech stack, repro)
-```
 
 ---
 
@@ -79,6 +77,20 @@ Benchmark — ensemble vs baselines:
 
 ---
 
+## What's in the box
+
+```
+identify/    → 30 fraud vectors + MITRE ATLAS mapping + threat-landscape API
+generate/    → CTGAN/TabDDPM + LLM agents + 3-axis fidelity harness
+defend/      → 5-model stacking ensemble + FastAPI /score /score/text /score/recent
+closed_loop/ → failure → seed → retrain pipeline
+webapp/      → Next.js 14 prototype, 7 pages, cyber-noir dark theme
+docs/        → Solution_Walkthrough.docx + 7 architecture diagrams + writeup script
+solution.md  → full writeup (problem, pillars, benchmark, tech stack, repro)
+```
+
+---
+
 ## Quick start
 
 ```bash
@@ -94,6 +106,6 @@ All 14 tests pass. Anthropic API is optional — template fallbacks work offline
 
 ---
 
-## License
+📄 **Full writeup:** [solution.md](solution.md) — problem statement, four-pillar deep-dive, benchmark table, tech stack, reproducibility.
 
 MIT — see [LICENSE](LICENSE).
