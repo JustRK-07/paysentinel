@@ -48,6 +48,34 @@ docs/        → Solution_Walkthrough.docx + 7 architecture diagrams + writeup s
 
 ---
 
+## What it looks like
+
+Dashboard — KPIs, live fraud-score stream, recent attacks:
+
+![dashboard](docs/figures/webapp-1-dashboard.jpg)
+
+Identify — 30-attack catalog with MITRE ATLAS heatmap:
+
+![identify](docs/figures/webapp-2-identify.jpg)
+
+Generate — multi-model synthesis with 3-axis fidelity report:
+
+![generate](docs/figures/webapp-3-generate.jpg)
+
+Defend — real-time ensemble scoring:
+
+![defend](docs/figures/webapp-4-defend.jpg)
+
+Closed Loop — defender misses feed new attack seeds:
+
+![loop](docs/figures/webapp-5-loop.jpg)
+
+Benchmark — ensemble vs baselines:
+
+![benchmark](docs/figures/webapp-6-benchmark.jpg)
+
+---
+
 ## Quick start
 
 ```bash
