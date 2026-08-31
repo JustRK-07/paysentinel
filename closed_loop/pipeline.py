@@ -126,7 +126,7 @@ def run_loop(
             run_fidelity=(i == 0),  # only first iter (saves time)
         )
         synth_path = Path(__file__).parent.parent / "data" / "synthetic" / "transactions.parquet"
-        synth_df = pd.read_parquet(synth_path) if synth_path.exists() else None
+        synth_df = pd.read_csv(synth_path) if synth_path.exists() else None
 
         # Use combined: 70% synthetic + 30% real for training
         base_df, _ = load_or_synthesize(base_dataset, n=base_n)

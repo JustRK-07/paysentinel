@@ -1,0 +1,70 @@
+{
+  "statistical": {
+    "per_column": {
+      "step": {
+        "ks_stat": 0.04700000000000004,
+        "ks_p": 0.4442792707040498,
+        "wasserstein_norm": 0.05724496171325166
+      },
+      "amount": {
+        "ks_stat": 0.1765,
+        "ks_p": 1.5819686610131876e-09,
+        "wasserstein_norm": 0.18583974832398495
+      },
+      "oldbalanceOrg": {
+        "ks_stat": 0.41250000000000003,
+        "ks_p": 1.7674687559558673e-51,
+        "wasserstein_norm": 0.6805691622269273
+      },
+      "newbalanceOrig": {
+        "ks_stat": 0.49200000000000005,
+        "ks_p": 3.1778806555771003e-74,
+        "wasserstein_norm": 0.8359376954350745
+      },
+      "oldbalanceDest": {
+        "ks_stat": 0.487,
+        "ks_p": 1.190867059938042e-72,
+        "wasserstein_norm": 0.8899270471198871
+      },
+      "newbalanceDest": {
+        "ks_stat": 0.0004999999999999449,
+        "ks_p": 1.0,
+        "wasserstein_norm": 0.022366272042126756
+      },
+      "isFraud": {
+        "ks_stat": 0.49950000000000006,
+        "ks_p": 1.2704729492435033e-76,
+        "wasserstein_norm": 0.49950000000000006
+      },
+      "isFlaggedFraud": {
+        "ks_stat": 0.0,
+        "ks_p": 1.0,
+        "wasserstein_norm": 0.0
+      }
+    },
+    "summary": {
+      "n_columns": 8,
+      "ks_pass_count": 3,
+      "ks_pass_rate": 0.375,
+      "wasserstein_normalised_mean": 0.3964231108576566,
+      "correlation_mae": 0.25031060896972773
+    }
+  },
+  "behavioral": {
+    "smurfing_detection_real": 0.0,
+    "smurfing_detection_synth": 0.047507619192739166,
+    "mule_flow_score_real": 1.0,
+    "mule_flow_score_synth": 6.666666666666667,
+    "summary": {
+      "n_checks": 4,
+      "max_drift": 0.0
+    }
+  },
+  "task_level": {
+    "skipped": true
+  },
+  "overall_score": 0.4624378782060545,
+  "notes": [
+    "Statistical fidelity low: <50% of columns pass KS test"
+  ]
+}

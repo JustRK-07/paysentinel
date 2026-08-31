@@ -1,0 +1,142 @@
+{
+  "duration_seconds": 45.0770149230957,
+  "per_model": {
+    "xgboost": {
+      "model_name": "xgboost",
+      "metrics": {
+        "auc": 0.5810433079376894,
+        "ap": 0.06259775606325411,
+        "f1": 0.10050251256281408,
+        "precision": 0.08163265306122448,
+        "recall": 0.13071895424836602,
+        "false_positive_rate": 0.06471095772217429,
+        "true_positives": 20,
+        "false_negatives": 133,
+        "true_negatives": 3252,
+        "false_positives": 225
+      },
+      "feature_importance": {
+        "feature_drain_flag": 0.44382819533348083,
+        "feature_small_amount_flag": 0.05353911221027374,
+        "feature_balance_dest_delta": 0.03489498794078827,
+        "feature_src_sum_1h": 0.03261378034949303,
+        "feature_transfer_only_flag": 0.03228573501110077,
+        "feature_balance_orig_delta": 0.031834300607442856,
+        "feature_amount_to_balance_ratio": 0.030964426696300507,
+        "feature_type_debit": 0.03027964197099209,
+        "feature_type_transfer": 0.030219124630093575,
+        "feature_amount": 0.029582098126411438,
+        "feature_amount_log": 0.029010910540819168,
+        "feature_step_hour": 0.0287588182836771,
+        "feature_type_payment": 0.02795596234500408,
+        "feature_type_cash_out": 0.027331732213497162,
+        "feature_amount_percentile_user": 0.026813430711627007
+      },
+      "duration_seconds": 9.044537544250488,
+      "n_train": 14520,
+      "n_test": 3630,
+      "notes": []
+    },
+    "lightgbm": {
+      "model_name": "lightgbm",
+      "metrics": {
+        "auc": 0.5562491893507475,
+        "ap": 0.05817032876418458,
+        "f1": 0.09504132231404959,
+        "precision": 0.06948640483383686,
+        "recall": 0.1503267973856209,
+        "false_positive_rate": 0.08858211101524302,
+        "true_positives": 23,
+        "false_negatives": 130,
+        "true_negatives": 3169,
+        "false_positives": 308
+      },
+      "feature_importance": {
+        "feature_balance_dest_delta": 1999.0,
+        "feature_amount_to_balance_ratio": 1866.0,
+        "feature_step_hour": 1290.0,
+        "feature_amount": 1077.0,
+        "feature_balance_orig_delta": 999.0,
+        "feature_src_sum_1h": 990.0,
+        "feature_amount_zscore_user": 495.0,
+        "feature_amount_log": 193.0,
+        "feature_amount_percentile_user": 180.0,
+        "feature_src_count_24h": 146.0,
+        "feature_type_payment": 137.0,
+        "feature_type_cash_in": 117.0,
+        "feature_type_cash_out": 90.0,
+        "feature_type_transfer": 81.0,
+        "feature_src_count_1h": 65.0
+      },
+      "duration_seconds": 10.38850450515747,
+      "n_train": 14520,
+      "n_test": 3630,
+      "notes": []
+    },
+    "heterogeneous_gnn": {
+      "model_name": "mlp_fallback",
+      "metrics": {
+        "auc": 0.5393162537759807,
+        "ap": 0.06354432944648089,
+        "f1": 0.13008130081300814,
+        "precision": 0.17204301075268819,
+        "recall": 0.10457516339869281,
+        "false_positive_rate": 0.022145527753810755,
+        "true_positives": 16,
+        "false_negatives": 137,
+        "true_negatives": 3400,
+        "false_positives": 77
+      },
+      "duration_seconds": 0.5672619342803955,
+      "n_train": 14520,
+      "n_test": 3630,
+      "notes": [
+        "MLP fallback (torch-geometric unavailable)"
+      ]
+    },
+    "transformer_sequence": {
+      "model_name": "logreg_fallback",
+      "metrics": {
+        "auc": 0.5903425122325797,
+        "ap": 0.06868318544943133,
+        "f1": 0.11992263056092843,
+        "precision": 0.08516483516483517,
+        "recall": 0.20261437908496732,
+        "false_positive_rate": 0.09577221742881795,
+        "true_positives": 31,
+        "false_negatives": 122,
+        "true_negatives": 3144,
+        "false_positives": 333
+      },
+      "duration_seconds": 0.12000536918640137,
+      "n_train": 14520,
+      "n_test": 3630,
+      "notes": [
+        "LogReg fallback (PyTorch unavailable or insufficient sequences)"
+      ]
+    }
+  },
+  "ensemble": {
+    "per_model_metrics": {
+      "xgboost": {
+        "auc": 0.5810433079376894,
+        "ap": 0.06259775606325411,
+        "f1_at_0.5": 0.10050251256281408
+      },
+      "lightgbm": {
+        "auc": 0.5562491893507475,
+        "ap": 0.05817032876418458,
+        "f1_at_0.5": 0.09504132231404959
+      }
+    },
+    "blended_auc": 0.5735768758658674,
+    "blended_f1": 0.10632911392405063,
+    "blended_precision": 0.08677685950413223,
+    "blended_recall": 0.13725490196078433,
+    "blended_false_positive_rate": 0.0635605406960023,
+    "threshold": 0.5,
+    "notes": [
+      "FP-rate > 5% \u2014 consider raising threshold"
+    ]
+  }
+}

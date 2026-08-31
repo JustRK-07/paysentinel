@@ -1,0 +1,19 @@
+{
+  "n_transactions": 1350,
+  "n_narrative": 220,
+  "attacks_covered": [
+    "PSF-017",
+    "PSF-018",
+    "PSF-026"
+  ],
+  "fidelity_overall": 0.46171506953639496,
+  "per_attack_fidelity": {
+    "PSF-017": 0.47026697384902355,
+    "PSF-018": 0.4524403565541069,
+    "PSF-026": 0.4624378782060545
+  },
+  "duration_seconds": 0.18750905990600586,
+  "notes": [
+    "Overall fidelity below 0.5 \u2014 consider more base data"
+  ]
+}
