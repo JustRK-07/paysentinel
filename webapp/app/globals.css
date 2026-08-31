@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: "Inter", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  html,
+  body {
+    background: theme("colors.background");
+    color: theme("colors.fg");
+    font-family: var(--font-inter);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: theme("colors.primary.DEFAULT");
+    color: theme("colors.primary.fg");
+  }
+  /* Subtle grid background for the cyber-noir feel */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(rgba(0, 229, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+    z-index: 0;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    background: linear-gradient(135deg, #00e5ff 0%, #ff006e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glass {
+    background: rgba(17, 19, 26, 0.7);
+    backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(31, 34, 48, 0.6);
+  }
+  .glow-cyan {
+    box-shadow: 0 0 24px rgba(0, 229, 255, 0.25);
+  }
+  .glow-magenta {
+    box-shadow: 0 0 24px rgba(255, 0, 110, 0.25);
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Tremor dark-mode overrides */
+.tremor-Card-root {
+  background: theme("colors.surface") !important;
+  border-color: theme("colors.border") !important;
+}
