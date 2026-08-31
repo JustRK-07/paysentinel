@@ -6,10 +6,30 @@ import {
 } from "lucide-react";
 
 export const mockKpis = [
-  { label: "Attacks identified", value: "30", sub: "across 7 surfaces", icon: AlertTriangle, color: "text-accent", delta: "+0" },
-  { label: "Sims generated", value: "5,840", sub: "txns + 220 narrative", icon: Cpu, color: "text-info", delta: "+2,300" },
-  { label: "Live F1", value: "0.873", sub: "blended ensemble", icon: Shield, color: "text-success", delta: "+0.083" },
-  { label: "FP rate", value: "0.021", sub: "at 50k txns", icon: Activity, color: "text-primary", delta: "-0.012" },
+  {
+    label: "Attacks identified", value: "30", sub: "across 7 surfaces", icon: AlertTriangle, color: "text-accent",
+    delta: "+0", sparkColor: "magenta" as const, sparkKey: "attacks",
+    tooltip: "Total distinct GenAI payment fraud vectors catalogued, mapped to MITRE ATLAS tactics.",
+    sparkData: Array.from({ length: 12 }, (_, i) => ({ t: i, attacks: 26 + Math.round(Math.random() * 4) })),
+  },
+  {
+    label: "Sims generated", value: "5,840", sub: "txns + 220 narrative", icon: Cpu, color: "text-info",
+    delta: "+2,300", sparkColor: "violet" as const, sparkKey: "sims",
+    tooltip: "Synthetic fraud artifacts produced by the Generate pillar — both transactions and narrative.",
+    sparkData: Array.from({ length: 12 }, (_, i) => ({ t: i, sims: Math.round(2000 + i * 320 + Math.random() * 400) })),
+  },
+  {
+    label: "Live F1", value: "0.873", sub: "blended ensemble", icon: Shield, color: "text-success",
+    delta: "+0.083", sparkColor: "emerald" as const, sparkKey: "f1",
+    tooltip: "Harmonic mean of precision and recall on the live scoring stream. Higher is better.",
+    sparkData: Array.from({ length: 12 }, (_, i) => ({ t: i, f1: parseFloat((0.78 + i * 0.008 + Math.random() * 0.01).toFixed(3)) })),
+  },
+  {
+    label: "FP rate", value: "0.021", sub: "at 50k txns", icon: Activity, color: "text-primary",
+    delta: "-0.012", sparkColor: "cyan" as const, sparkKey: "fp",
+    tooltip: "False positive rate: legitimate transactions flagged as fraud. Lower is better.",
+    sparkData: Array.from({ length: 12 }, (_, i) => ({ t: i, fp: parseFloat((0.033 - i * 0.001 + Math.random() * 0.002).toFixed(4)) })),
+  },
 ];
 
 export const mockScoreStream = Array.from({ length: 60 }, (_, i) => ({

@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/nav";
 import { TopBar } from "@/components/top-bar";
+import { ToastHost } from "@/components/toast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Nav />
             <main className="flex-1 ml-56 pt-16 px-8 py-8 relative z-10">{children}</main>
           </div>
+          <ToastHost />
         </div>
       </body>
     </html>

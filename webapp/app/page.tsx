@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AreaChart, Card, Metric, Text, Badge, Grid, Flex } from "@tremor/react";
+import { AreaChart, Card, Metric, Text, Badge, Grid, Flex, SparkAreaChart } from "@tremor/react";
 import { Activity, AlertTriangle, Cpu, Shield, Zap, TrendingUp } from "lucide-react";
 import { mockKpis, mockScoreStream, mockRecentAttacks } from "@/lib/mock-data";
+import { MetricTooltip } from "@/components/ui-states";
 
 export default function DashboardPage() {
   return (
@@ -31,7 +32,7 @@ export default function DashboardPage() {
         </p>
       </header>
 
-      {/* KPI tiles */}
+      {/* KPI tiles with sparklines */}
       <Grid numItems={4} className="gap-4">
         {mockKpis.map((k, i) => (
           <motion.div
@@ -42,10 +43,23 @@ export default function DashboardPage() {
           >
             <Card className="glass">
               <Flex>
-                <Text className="text-fg-muted text-xs uppercase tracking-wider">{k.label}</Text>
+                <Text className="text-fg-muted text-xs uppercase tracking-wider flex items-center">
+                  {k.label}
+                  <MetricTooltip text={k.tooltip} />
+                </Text>
                 <k.icon className={`w-4 h-4 ${k.color}`} />
               </Flex>
               <Metric className="mt-2 font-mono">{k.value}</Metric>
+              <div className="h-8 mt-1">
+                <SparkAreaChart
+                  data={k.sparkData}
+                  index="t"
+                  categories={[k.sparkKey]}
+                  colors={[k.sparkColor]}
+                  showGradient
+                  className="h-full"
+                />
+              </div>
               <Flex className="mt-1">
                 <Text className="text-xs text-fg-muted">{k.sub}</Text>
                 {k.delta && (
@@ -96,13 +110,13 @@ export default function DashboardPage() {
                 transition={{ duration: 0.3, delay: 0.03 * i }}
                 className="flex items-center justify-between rounded-md border border-border bg-elevated px-3 py-2"
               >
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-primary">{a.id}</span>
-                  <span className="text-xs">{a.name}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-mono text-xs text-primary shrink-0">{a.id}</span>
+                  <span className="text-xs truncate">{a.name}</span>
                 </div>
                 <Badge
                   color={a.severity === "critical" ? "red" : a.severity === "high" ? "amber" : "yellow"}
-                  className="text-xs"
+                  className="text-xs shrink-0"
                 >
                   {a.severity}
                 </Badge>
@@ -129,11 +143,24 @@ export default function DashboardPage() {
         </Card>
         <Card className="glass">
           <Flex>
-            <Text className="text-fg-muted text-xs uppercase tracking-wider">Detection latency</Text>
+            <Text className="text-fg-muted text-xs uppercase tracking-wider flex items-center">
+              Detection latency
+              <MetricTooltip text="99th percentile scoring latency across all ensemble members." />
+            </Text>
             <Zap className="w-4 h-4 text-warning" />
           </Flex>
-          <Metric className="mt-2 font-mono">38<span className="text-sm text-fg-muted ml-1">ms</span></Metric>
-          <Text className="text-xs text-fg-muted">p99 · target &lt; 50ms</Text>
+          <div className="text-3xl font-mono mt-2">38<span className="text-sm text-fg-muted ml-1">ms</span></div>
+          <div className="h-8 mt-2">
+            <SparkAreaChart
+              data={Array.from({ length: 20 }, (_, i) => ({ t: i, latency: 30 + Math.sin(i / 3) * 8 + Math.random() * 4 }))}
+              index="t"
+              categories={["latency"]}
+              colors={["amber"]}
+              showGradient
+              className="h-full"
+            />
+          </div>
+          <Text className="text-xs text-fg-muted mt-1">p99 · target &lt; 50ms</Text>
         </Card>
         <Card className="glass">
           <Flex>
@@ -141,6 +168,20 @@ export default function DashboardPage() {
             <TrendingUp className="w-4 h-4 text-success" />
           </Flex>
           <Metric className="mt-2 font-mono">0.947</Metric>
+          <div className="h-8 mt-1">
+            <SparkAreaChart
+              data={[
+                { t: 1, auc: 0.864 },
+                { t: 2, auc: 0.921 },
+                { t: 3, auc: 0.947 },
+              ]}
+              index="t"
+              categories={["auc"]}
+              colors={["emerald"]}
+              showGradient
+              className="h-full"
+            />
+          </div>
           <Text className="text-xs text-fg-muted">+0.083 over 3 iterations</Text>
         </Card>
       </Grid>
